@@ -1,0 +1,13 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_PASSWORD: hoge
+      POSTGRES_USER: seolhui
+      POSTGRES_DB: maindb
+    ports:
+      - "5432:5432"
+    volumes:
+      - mainvol:/var/lib/postgresql
+volumes: 
+  mainvol:
