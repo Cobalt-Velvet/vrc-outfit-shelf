@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"os"
 
 	"github.com/jackc/pgx/v5"
@@ -24,4 +27,13 @@ func main() {
 	}
 
 	fmt.Println(count)
+
+	httphandler := func(w http.ResponseWriter, req *http.Request) {
+		io.WriteString(w, "asdf\n")
+	}
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", httphandler)
+	log.Fatal(http.ListenAndServe(":8080", mux))
 }
