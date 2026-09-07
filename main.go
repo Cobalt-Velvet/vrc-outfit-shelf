@@ -21,10 +21,9 @@ func main() {
 	defer conn.Close(context.Background())
 
 	//--------------------------http server-------------------------
-
+	//-----------get asset name-----------
 	listAssets := func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		//---------------get asset name-----------
 		rows, err := conn.Query(context.Background(), "select asset_name from assets")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
@@ -64,9 +63,27 @@ category : <select name="asset_category">
 <input type="submit" value="submit"><br>
 </form>`)
 	}
-
+	//-----------post asset name-----------
 	createAsset := func(w http.ResponseWriter, req *http.Request) {
+		assetName := req.FormValue("asset_name")
+		creator := req.FormValue("creator")
+		shopURL := req.FormValue("shop_url")
+		memo := req.FormValue("memo")
+		category := req.FormValue("asset_category")
 
+		if assetName == "" || creator == "" || category == "" {
+			http.Error(w, "Non nullable field is NULL now", http.StatusBadRequest)
+			return
+		}
+
+		_, err := conn.Exec(context.Background(),
+			"insert into assets (user_id, asset_name, creator, shop_url, memo, asset_category) values (1, $1, $2, $3, $4, $5)", assetName, creator, shopURL, memo, category)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Insert failed: %v\n", err)
+			http.Error(w, "db insert fail", http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, req, "/assets", http.StatusSeeOther)
 	}
 
 	mux := http.NewServeMux()
