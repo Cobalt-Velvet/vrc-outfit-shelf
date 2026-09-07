@@ -23,6 +23,7 @@ func main() {
 	//--------------------------http server-------------------------
 
 	listAssets := func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		//---------------get asset name-----------
 		rows, err := conn.Query(context.Background(), "select asset_name from assets")
 		if err != nil {
@@ -38,15 +39,40 @@ func main() {
 				fmt.Fprint(w, "Failed\n")
 				continue
 			}
-			fmt.Fprintf(w, "%s\n", assetName)
+			fmt.Fprintf(w, "<div>%s</div>", assetName)
 		}
 		if rows.Err() != nil {
 			http.Error(w, "db get fail", http.StatusInternalServerError)
 		}
+
+		fmt.Fprint(w,
+			`<form method="post" action="/assets">
+category : <select name="asset_category">
+<option>clothing</option>
+<option>hair</option>
+<option>accessory</option>
+<option>prop</option>
+<option>texture</option>
+<option>tool</option>
+<option>animation</option>
+<option>other</option>
+</select>
+<label>asset_name: <input name="asset_name"></label><br>
+<label>creator: <input name="creator"></label><br>
+<label>shop_url: <input name="shop_url"></label><br>
+<label>memo: <input name="memo"></label><br>
+<input type="submit" value="submit"><br>
+</form>`)
+	}
+
+	createAsset := func(w http.ResponseWriter, req *http.Request) {
+
 	}
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", listAssets)
+	mux.HandleFunc("GET /assets", listAssets)
+	mux.HandleFunc("POST /assets", createAsset)
+
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
