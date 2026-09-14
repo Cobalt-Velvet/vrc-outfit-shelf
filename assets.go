@@ -6,9 +6,12 @@ import (
 	"os"
 )
 
+type Asset struct {
+	Name string
+}
+
 // -----------get asset name-----------
 func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	rows, err := s.pool.Query(req.Context(), "select asset_name from assets")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
@@ -16,38 +19,25 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer rows.Close()
+
+	var assets []Asset
 	for rows.Next() {
 		var assetName string
 		if err := rows.Scan(&assetName); err != nil {
 			fmt.Fprintf(os.Stderr, "Scan failed: %v\n", err)
-			fmt.Fprint(w, "Failed\n")
-			continue
+			http.Error(w, "Writing failed", http.StatusInternalServerError)
+			return
 		}
-		fmt.Fprintf(w, "<div>%s</div>", assetName)
+		assets = append(assets, Asset{Name: assetName})
 	}
 	if rows.Err() != nil {
+		fmt.Fprintf(os.Stderr, "get failed: %v\n", err)
 		http.Error(w, "db get fail", http.StatusInternalServerError)
 		return
 	}
-
-	fmt.Fprint(w,
-		`<form method="post" action="/assets">
-category : <select name="asset_category">
-<option>clothing</option>
-<option>hair</option>
-<option>accessory</option>
-<option>prop</option>
-<option>texture</option>
-<option>tool</option>
-<option>animation</option>
-<option>other</option>
-</select>
-<label>asset_name: <input name="asset_name"></label><br>
-<label>creator: <input name="creator"></label><br>
-<label>shop_url: <input name="shop_url"></label><br>
-<label>memo: <input name="memo"></label><br>
-<input type="submit" value="submit"><br>
-</form>`)
+	if err := s.tmpl.Execute(w, assets); err != nil {
+		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+	}
 }
 
 // -----------post asset name-----------

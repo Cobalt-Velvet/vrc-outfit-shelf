@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +21,13 @@ func main() {
 	fmt.Println("Passed")
 	defer pool.Close()
 
-	srv := &server{pool: pool}
+	tmpl, err := template.ParseFiles("templates/assets.html")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to read HTML: %v\n", err)
+		os.Exit(1)
+	}
+
+	srv := &server{pool: pool, tmpl: tmpl}
 
 	mux := http.NewServeMux()
 

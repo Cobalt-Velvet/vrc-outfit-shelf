@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VRC Outfit Shelf</title>
+</head>
+<body>
+    <form method="post" action="/assets">
+        category : <select name="asset_category">
+            <option>clothing</option>
+            <option>hair</option>
+            <option>accessory</option>
+            <option>prop</option>
+            <option>texture</option>
+            <option>tool</option>
+            <option>animation</option>
+            <option>other</option>
+        </select>
+        <label>asset_name: <input name="asset_name"></label><br>
+        <label>creator: <input name="creator"></label><br>
+        <label>shop_url: <input name="shop_url"></label><br>
+        <label>memo: <input name="memo"></label><br>
+        <input type="submit" value="submit"><br>
+    </form>
+
+    <div>
+        {{range .}}
+            <div>{{.Name}}</div>
+        {{end}}
+    </div>
+</body>
+</html>
