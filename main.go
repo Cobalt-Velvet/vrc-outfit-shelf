@@ -21,7 +21,7 @@ func main() {
 	fmt.Println("Passed")
 	defer pool.Close()
 
-	tmpl, err := template.ParseFiles("templates/assets.html")
+	tmpl, err := template.ParseGlob("templates/*.html")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to read HTML: %v\n", err)
 		os.Exit(1)
@@ -33,6 +33,8 @@ func main() {
 
 	mux.HandleFunc("GET /assets", srv.listAssets)
 	mux.HandleFunc("POST /assets", srv.createAsset)
+	mux.HandleFunc("GET /signup", srv.signupForm)
+	mux.HandleFunc("POST /signup", srv.signup)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

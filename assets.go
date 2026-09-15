@@ -15,7 +15,7 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 	rows, err := s.pool.Query(req.Context(), "select asset_name from assets")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
-		http.Error(w, "db connect fail", http.StatusInternalServerError)
+		http.Error(w, "Query fail", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
@@ -25,17 +25,17 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 		var assetName string
 		if err := rows.Scan(&assetName); err != nil {
 			fmt.Fprintf(os.Stderr, "Scan failed: %v\n", err)
-			http.Error(w, "Writing failed", http.StatusInternalServerError)
+			http.Error(w, "Scan failed", http.StatusInternalServerError)
 			return
 		}
 		assets = append(assets, Asset{Name: assetName})
 	}
-	if rows.Err() != nil {
-		fmt.Fprintf(os.Stderr, "get failed: %v\n", err)
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "rows failed: %v\n", err)
 		http.Error(w, "db get fail", http.StatusInternalServerError)
 		return
 	}
-	if err := s.tmpl.Execute(w, assets); err != nil {
+	if err := s.tmpl.ExecuteTemplate(w, "assets.html", assets); err != nil {
 		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
 	}
 }
