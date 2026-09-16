@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS assets;
 DROP TABLE IF EXISTS avatar_mods;
 DROP TABLE IF EXISTS presets;
 DROP TABLE IF EXISTS avatars;
+DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS users;
 DROP TYPE IF EXISTS category;
 
@@ -64,4 +65,10 @@ CREATE TABLE compatibility (
     asset_id INT NOT NULL REFERENCES assets(asset_id) ON DELETE CASCADE,
     memo TEXT,
     PRIMARY KEY (avatar_id, asset_id)
+);
+
+CREATE TABLE sessions (
+    session_id TEXT PRIMARY KEY,
+    expires_at TIMESTAMPTZ NOT NULL,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE
 );
