@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,4 +46,36 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
+}
+
+func (s *server) signinForm(w http.ResponseWriter, req *http.Request) {
+	if err := s.tmpl.ExecuteTemplate(w, "signin.html", nil); err != nil {
+		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+	}
+}
+
+func (s *server) signin(w http.ResponseWriter, req *http.Request) {
+
+	vrcName := req.FormValue("vrc_name")
+	// password := req.FormValue("password")
+
+	var idCheck rune
+	var hashCheck string
+
+	scan := s.pool.QueryRow(
+		req.Context(),
+		"select user_id, password_hash from users where vrc_name = $1",
+		vrcName,
+	).Scan(&idCheck, &hashCheck)
+
+	if errors.Is(scan, pgx.ErrNoRows) {
+		http.Error(w, "ユーザー名またはパスワードが正しくありません", http.StatusUnauthorized)
+		return
+	}
+
+	if scan != nil {
+		fmt.Fprintf(os.Stderr, "Query failed: %v\n", scan)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
