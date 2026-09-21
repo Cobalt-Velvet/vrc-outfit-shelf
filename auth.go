@@ -57,25 +57,38 @@ func (s *server) signinForm(w http.ResponseWriter, req *http.Request) {
 func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 
 	vrcName := req.FormValue("vrc_name")
-	// password := req.FormValue("password")
+	password := req.FormValue("password")
 
-	var idCheck rune
+	if vrcName == "" || password == "" {
+		http.Error(w, "Non-nullable field is NULL now", http.StatusBadRequest)
+		return
+	}
+
+	var idCheck int
 	var hashCheck string
 
-	scan := s.pool.QueryRow(
-		req.Context(),
+	err := s.pool.QueryRow(req.Context(),
 		"select user_id, password_hash from users where vrc_name = $1",
 		vrcName,
 	).Scan(&idCheck, &hashCheck)
 
-	if errors.Is(scan, pgx.ErrNoRows) {
+	// TODO: run bcrypt against a dummy hash when the user is not found,
+	// so response time doesn't reveal whether the name is registered
+
+	if errors.Is(err, pgx.ErrNoRows) {
 		http.Error(w, "ユーザー名またはパスワードが正しくありません", http.StatusUnauthorized)
 		return
 	}
 
-	if scan != nil {
-		fmt.Fprintf(os.Stderr, "Query failed: %v\n", scan)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(hashCheck), []byte(password)); err != nil {
+		http.Error(w, "ユーザー名またはパスワードが正しくありません", http.StatusUnauthorized)
+		return
+	}
+	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }

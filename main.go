@@ -35,6 +35,8 @@ func main() {
 	mux.HandleFunc("POST /assets", srv.createAsset)
 	mux.HandleFunc("GET /signup", srv.signupForm)
 	mux.HandleFunc("POST /signup", srv.signup)
+	mux.HandleFunc("GET /signin", srv.signinForm)
+	mux.HandleFunc("POST /signin", srv.signin)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
