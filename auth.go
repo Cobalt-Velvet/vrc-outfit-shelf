@@ -1,10 +1,12 @@
 package main
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -90,5 +92,27 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "ユーザー名またはパスワードが正しくありません", http.StatusUnauthorized)
 		return
 	}
+
+	//session
+	sessionID := rand.Text()
+	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	_, err = s.pool.Exec(req.Context(),
+		"insert into sessions (session_id, user_id, expires_at) values ($1, $2, $3)",
+		sessionID, idCheck, expiresAt)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Session insert failed: %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  expiresAt,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }

@@ -18,7 +18,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("Passed")
 	defer pool.Close()
 
 	tmpl, err := template.ParseGlob("templates/*.html")
