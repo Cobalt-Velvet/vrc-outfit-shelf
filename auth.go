@@ -24,7 +24,7 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 	password := req.FormValue("password")
 
 	if vrcName == "" || password == "" {
-		http.Error(w, "Non-nullable field is NULL now", http.StatusBadRequest)
+		http.Error(w, "ユーザー名とパスワードを入力してください", http.StatusBadRequest)
 		return
 	}
 
@@ -62,7 +62,7 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 	password := req.FormValue("password")
 
 	if vrcName == "" || password == "" {
-		http.Error(w, "Non-nullable field is NULL now", http.StatusBadRequest)
+		http.Error(w, "ユーザー名とパスワードを入力してください", http.StatusBadRequest)
 		return
 	}
 

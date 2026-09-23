@@ -49,7 +49,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	category := req.FormValue("asset_category")
 
 	if assetName == "" || creator == "" || category == "" {
-		http.Error(w, "Non-nullable field is NULL now", http.StatusBadRequest)
+		http.Error(w, "アセット名・制作者・カテゴリは必須です", http.StatusBadRequest)
 		return
 	}
 
