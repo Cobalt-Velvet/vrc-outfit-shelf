@@ -13,8 +13,8 @@ type Asset struct {
 // -----------get asset name-----------
 func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 
-	userID, err := s.currentUserID(req)
-	fmt.Println(userID, err)
+	// userID, err := s.currentUserID(req)
+	// fmt.Println(userID, err)
 
 	rows, err := s.pool.Query(req.Context(), "select asset_name from assets")
 	if err != nil {
