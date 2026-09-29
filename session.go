@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -8,6 +9,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 )
+
+type userIDKey struct{}
 
 var errNotLoggedIn = errors.New("not logged in")
 
@@ -33,7 +36,7 @@ func (s *server) currentUserID(req *http.Request) (int, error) {
 
 func (s *server) requireLogin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		_, err := s.currentUserID(req)
+		userID, err := s.currentUserID(req)
 		if errors.Is(err, errNotLoggedIn) {
 			http.Redirect(w, req, "/signin", http.StatusSeeOther)
 			return
@@ -43,6 +46,12 @@ func (s *server) requireLogin(next http.Handler) http.Handler {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+
+		ctx := context.WithValue(req.Context(), userIDKey{}, userID)
+		req = req.WithContext(ctx)
+
 		next.ServeHTTP(w, req)
 	})
 }
+
+func userIDFromContext(ctx context.Context) (int, bool)
