@@ -2,7 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -27,4 +29,20 @@ func (s *server) currentUserID(req *http.Request) (int, error) {
 	}
 
 	return userID, nil
+}
+
+func (s *server) requireLogin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		_, err := s.currentUserID(req)
+		if errors.Is(err, errNotLoggedIn) {
+			http.Redirect(w, req, "/signin", http.StatusSeeOther)
+			return
+		}
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Session check failed: %v\n", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		next.ServeHTTP(w, req)
+	})
 }
