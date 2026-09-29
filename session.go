@@ -54,4 +54,7 @@ func (s *server) requireLogin(next http.Handler) http.Handler {
 	})
 }
 
-func userIDFromContext(ctx context.Context) (int, bool)
+func userIDFromContext(ctx context.Context) (int, bool) {
+	id, ok := ctx.Value(userIDKey{}).(int)
+	return id, ok
+}
