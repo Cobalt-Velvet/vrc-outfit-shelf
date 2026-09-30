@@ -12,8 +12,14 @@ type Asset struct {
 
 // -----------get asset name-----------
 func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
+	userID, ok := userIDFromContext(req.Context())
+	if !ok {
+		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
-	rows, err := s.pool.Query(req.Context(), "select asset_name from assets")
+	rows, err := s.pool.Query(req.Context(), "select asset_name from assets where user_id = $1", userID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
 		http.Error(w, "Query fail", http.StatusInternalServerError)
@@ -43,6 +49,13 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 
 // -----------post asset name-----------
 func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
+	userID, ok := userIDFromContext(req.Context())
+	if !ok {
+		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
 	assetName := req.FormValue("asset_name")
 	creator := req.FormValue("creator")
 	shopURL := req.FormValue("shop_url")
@@ -56,7 +69,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 
 	_, err := s.pool.Exec(req.Context(),
 		`insert into assets (user_id, asset_name, creator, shop_url, memo, asset_category)
-			values (1, $1, $2, $3, $4, $5)`, assetName, creator, shopURL, memo, category)
+			values ($1, $2, $3, $4, $5, $6)`, userID, assetName, creator, shopURL, memo, category)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Insert failed: %v\n", err)
 		http.Error(w, "db insert fail", http.StatusInternalServerError)
