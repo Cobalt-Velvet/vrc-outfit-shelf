@@ -31,7 +31,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /assets", srv.requireLogin(http.HandlerFunc(srv.listAssets)))
-	mux.HandleFunc("POST /assets", srv.createAsset)
+	mux.Handle("POST /assets", srv.requireLogin(http.HandlerFunc(srv.createAsset)))
 	mux.HandleFunc("GET /signup", srv.signupForm)
 	mux.HandleFunc("POST /signup", srv.signup)
 	mux.HandleFunc("GET /signin", srv.signinForm)
