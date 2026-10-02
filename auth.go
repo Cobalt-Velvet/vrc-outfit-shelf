@@ -116,3 +116,24 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
+
+func (s *server) signout(w http.ResponseWriter, req *http.Request) {
+	cookie, err := req.Cookie("session_id")
+	if err != nil {
+		http.Redirect(w, req, "/signin", http.StatusSeeOther)
+		return
+	}
+	_, err = s.pool.Exec(req.Context(), "delete from sessions where session_id = $1", cookie.Value)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Session delete failed: %v\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   "session_id",
+		Value:  "",
+		Path:   "/",
+		MaxAge: -1,
+	})
+	http.Redirect(w, req, "/signin", http.StatusSeeOther)
+}
