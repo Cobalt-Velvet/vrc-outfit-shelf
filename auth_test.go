@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -44,5 +45,57 @@ func TestSignoutNoCookie(t *testing.T) {
 	wantLocation := "/signin"
 	if rec.Result().Header.Get("Location") != wantLocation {
 		t.Errorf("location = %v, want %v", rec.Result().Header.Get("Location"), wantLocation)
+	}
+}
+
+func TestSignupEmptyName(t *testing.T) {
+	srv := &server{}
+	req := httptest.NewRequest("POST", "/signup", strings.NewReader("password=teststring"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	srv.signup(rec, req)
+	want := http.StatusBadRequest
+	if rec.Code != want {
+		t.Errorf("status = %v, want %v", rec.Code, want)
+	}
+}
+
+func TestSignupEmptyPassword(t *testing.T) {
+	srv := &server{}
+	req := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	srv.signup(rec, req)
+	want := http.StatusBadRequest
+	if rec.Code != want {
+		t.Errorf("status = %v, want %v", rec.Code, want)
+	}
+}
+
+func TestSigninEmptyName(t *testing.T) {
+	srv := &server{}
+	req := httptest.NewRequest("POST", "/signin", strings.NewReader("password=teststring"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	srv.signup(rec, req)
+	want := http.StatusBadRequest
+	if rec.Code != want {
+		t.Errorf("status = %v, want %v", rec.Code, want)
+	}
+}
+
+func TestSigninEmptyPassword(t *testing.T) {
+	srv := &server{}
+	req := httptest.NewRequest("POST", "/signin", strings.NewReader("password=teststring"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	srv.signup(rec, req)
+	want := http.StatusBadRequest
+	if rec.Code != want {
+		t.Errorf("status = %v, want %v", rec.Code, want)
 	}
 }
