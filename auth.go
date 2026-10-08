@@ -47,7 +47,7 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "db insert fail", http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, req, "/assets", http.StatusSeeOther)
+	http.Redirect(w, req, "/signin", http.StatusSeeOther)
 }
 
 func (s *server) signinForm(w http.ResponseWriter, req *http.Request) {
