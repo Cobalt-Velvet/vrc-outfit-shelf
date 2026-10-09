@@ -7,8 +7,18 @@
 </head>
 <body>
     <form method="post" action="/signin">
-        <label>VRC Name: <input name="vrc_name"></label><br>
-         <label>Password: <input name="password" type="password"></label><br>
+        <label>
+            VRC Name: 
+            <input name="vrc_name" type="text" required>
+        </label>
+        <br>
+
+        <label>
+            Password: 
+            <input name="password" type="password" required>
+        </label>
+        <br>
+        
         <input type="submit" value="submit"><br>
     </form>
     <a href="/signup">
