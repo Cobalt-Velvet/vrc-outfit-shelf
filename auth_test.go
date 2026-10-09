@@ -102,7 +102,7 @@ func TestSigninEmptyPassword(t *testing.T) {
 
 func TestRequireLogin(t *testing.T) {
 	srv := &server{}
-	req := httptest.NewRequest("POST", "/signin", nil)
+	req := httptest.NewRequest("POST", "/assets", nil)
 	rec := httptest.NewRecorder()
 
 	called := false
