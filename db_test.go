@@ -48,3 +48,24 @@ func TestSignupSuccess(t *testing.T) {
 		t.Errorf("location = %v, want %v", rec.Result().Header.Get("Location"), wantLocation)
 	}
 }
+
+func TestSignupDuplicate(t *testing.T) {
+	srv := newTestServer(t)
+	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec1 := httptest.NewRecorder()
+	req2 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req2.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec2 := httptest.NewRecorder()
+
+	srv.signup(rec1, req1)
+	want := http.StatusSeeOther
+	if rec1.Code != want {
+		t.Fatalf("first signup = %v, want %v", rec1.Code, want)
+	}
+	srv.signup(rec2, req2)
+	want = http.StatusConflict
+	if rec2.Code != want {
+		t.Errorf("second signup = %v, want %v", rec2.Code, want)
+	}
+}
