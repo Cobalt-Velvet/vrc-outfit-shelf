@@ -82,12 +82,33 @@ func TestSigninSuccess(t *testing.T) {
 	srv.signup(rec1, req1)
 	want := http.StatusSeeOther
 	if rec1.Code != want {
-		t.Fatalf("first signup = %v, want %v", rec1.Code, want)
+		t.Fatalf("signup status = %v, want %v", rec1.Code, want)
 	}
 	srv.signin(rec2, req2)
 	want = http.StatusSeeOther
 	if rec2.Code != want {
-		t.Errorf("second signup = %v, want %v", rec2.Code, want)
+		t.Errorf("signin status = %v, want %v", rec2.Code, want)
+	}
+
+	wantLocation := "/assets"
+	if rec2.Result().Header.Get("Location") != wantLocation {
+		t.Errorf("location = %v, want %v", rec2.Result().Header.Get("Location"), wantLocation)
+	}
+
+	flag := false
+	for _, cookie := range rec2.Result().Cookies() {
+		if cookie.Name == "session_id" {
+			flag = true
+
+			if cookie.Value == "" {
+				t.Error("session_id cookie value is empty")
+			}
+
+			break
+		}
+	}
+	if !flag {
+		t.Error("session_id cookie not found")
 	}
 
 }
