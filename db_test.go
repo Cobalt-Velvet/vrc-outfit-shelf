@@ -103,7 +103,6 @@ func TestSigninSuccess(t *testing.T) {
 			if cookie.Value == "" {
 				t.Error("session_id cookie value is empty")
 			}
-
 			break
 		}
 	}
@@ -111,4 +110,38 @@ func TestSigninSuccess(t *testing.T) {
 		t.Error("session_id cookie not found")
 	}
 
+}
+
+func TestSigninUnknownUser(t *testing.T) {
+	srv := newTestServer(t)
+	req := httptest.NewRequest("POST", "/signin", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec := httptest.NewRecorder()
+
+	srv.signin(rec, req)
+	want := http.StatusUnauthorized
+	if rec.Code != want {
+		t.Fatalf("signin status = %v, want %v", rec.Code, want)
+	}
+}
+
+func TestSigninWrongPassword(t *testing.T) {
+	srv := newTestServer(t)
+	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec1 := httptest.NewRecorder()
+	req2 := httptest.NewRequest("POST", "/signin", strings.NewReader("vrc_name=teststring&password=testwrongstring"))
+	req2.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec2 := httptest.NewRecorder()
+
+	srv.signup(rec1, req1)
+	want := http.StatusSeeOther
+	if rec1.Code != want {
+		t.Fatalf("signup status = %v, want %v", rec1.Code, want)
+	}
+	srv.signin(rec2, req2)
+	want = http.StatusUnauthorized
+	if rec2.Code != want {
+		t.Errorf("signin status = %v, want %v", rec2.Code, want)
+	}
 }
