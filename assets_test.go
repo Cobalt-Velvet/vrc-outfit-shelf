@@ -1,0 +1,82 @@
+package main
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestDeleteAssetNotOwner(t *testing.T) {
+	srv := newTestServer(t)
+	_, err := srv.pool.Exec(context.Background(), `
+	INSERT INTO USERS (vrc_name, password_hash) 
+	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge')`)
+	if err != nil {
+		t.Fatalf("INSERT users FAIL : %v", err)
+	}
+	_, err = srv.pool.Exec(context.Background(), `
+	INSERT INTO ASSETS (user_id, asset_name, creator, asset_category) 
+	VALUES (1, 'testAsset', 'Anonymous Kipfel', 'other')`)
+	if err != nil {
+		t.Fatalf("INSERT asset FAIL : %v", err)
+	}
+
+	req := httptest.NewRequest("POST", "/assets/1/delete", nil)
+	req.SetPathValue("id", "1")
+	ctx := context.WithValue(req.Context(), userIDKey{}, 2)
+	req = req.WithContext(ctx)
+	rec := httptest.NewRecorder()
+
+	srv.deleteAsset(rec, req)
+	want := http.StatusNotFound
+	if rec.Code != want {
+		t.Errorf("status = %v, want %v", rec.Code, want)
+	}
+	countRow := 0
+	err = srv.pool.QueryRow(context.Background(), `SELECT count(*) FROM assets WHERE asset_id = 1`).Scan(&countRow)
+	if err != nil {
+		t.Fatalf("SCAN asset FAIL : %v", err)
+	}
+	if countRow != 1 {
+		t.Errorf("count = %v, want %v", countRow, 1)
+	}
+
+}
+
+func TestDeleteAssetOwner(t *testing.T) {
+	srv := newTestServer(t)
+	_, err := srv.pool.Exec(context.Background(), `
+	INSERT INTO USERS (vrc_name, password_hash) 
+	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge')`)
+	if err != nil {
+		t.Fatalf("INSERT users FAIL : %v", err)
+	}
+	_, err = srv.pool.Exec(context.Background(), `
+	INSERT INTO ASSETS (user_id, asset_name, creator, asset_category) 
+	VALUES (1, 'testAsset', 'Anonymous Kipfel', 'other')`)
+	if err != nil {
+		t.Fatalf("INSERT asset FAIL : %v", err)
+	}
+
+	req := httptest.NewRequest("POST", "/assets/1/delete", nil)
+	req.SetPathValue("id", "1")
+	ctx := context.WithValue(req.Context(), userIDKey{}, 1)
+	req = req.WithContext(ctx)
+	rec := httptest.NewRecorder()
+
+	srv.deleteAsset(rec, req)
+	want := http.StatusSeeOther
+	if rec.Code != want {
+		t.Errorf("status = %v, want %v", rec.Code, want)
+	}
+	countRow := 0
+	err = srv.pool.QueryRow(context.Background(), `SELECT count(*) FROM assets WHERE asset_id = 1`).Scan(&countRow)
+	if err != nil {
+		t.Fatalf("SCAN asset FAIL : %v", err)
+	}
+	if countRow != 0 {
+		t.Errorf("count = %v, want %v", countRow, 0)
+	}
+
+}
