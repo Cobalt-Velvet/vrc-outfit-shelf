@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 type Asset struct {
@@ -73,6 +74,37 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Insert failed: %v\n", err)
 		http.Error(w, "db insert fail", http.StatusInternalServerError)
+		return
+	}
+	http.Redirect(w, req, "/assets", http.StatusSeeOther)
+}
+
+func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
+	userID, ok := userIDFromContext(req.Context())
+	if !ok {
+		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	targetAssetIDTemp := req.PathValue("id")
+	targetAssetID, err := strconv.Atoi(targetAssetIDTemp)
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+
+	result, err := s.pool.Exec(req.Context(),
+		`DELETE FROM ASSETS WHERE asset_id = $1 AND user_id = $2`, targetAssetID, userID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "DELETE failed: %v\n", err)
+		http.Error(w, "db DELETE fail", http.StatusInternalServerError)
+		return
+	}
+
+	countDel := result.RowsAffected()
+	if countDel == 0 {
+		http.NotFound(w, req)
 		return
 	}
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
