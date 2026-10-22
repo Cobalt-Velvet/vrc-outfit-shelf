@@ -9,6 +9,7 @@ import (
 
 type Asset struct {
 	Name string
+	ID   int
 }
 
 // -----------get asset name-----------
@@ -20,7 +21,7 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rows, err := s.pool.Query(req.Context(), "select asset_name from assets where user_id = $1", userID)
+	rows, err := s.pool.Query(req.Context(), "select asset_name, asset_id from assets where user_id = $1", userID)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
 		http.Error(w, "Query fail", http.StatusInternalServerError)
@@ -31,12 +32,13 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 	var assets []Asset
 	for rows.Next() {
 		var assetName string
-		if err := rows.Scan(&assetName); err != nil {
+		var assetID int
+		if err := rows.Scan(&assetName, &assetID); err != nil {
 			fmt.Fprintf(os.Stderr, "Scan failed: %v\n", err)
 			http.Error(w, "Scan failed", http.StatusInternalServerError)
 			return
 		}
-		assets = append(assets, Asset{Name: assetName})
+		assets = append(assets, Asset{Name: assetName, ID: assetID})
 	}
 	if err := rows.Err(); err != nil {
 		fmt.Fprintf(os.Stderr, "rows failed: %v\n", err)
@@ -79,6 +81,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
 
+// ------------------------------
 func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {

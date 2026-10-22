@@ -27,6 +27,9 @@
     <div>
         {{range .}}
             <div>{{.Name}}</div>
+            <form method="post" action="/assets/{{.ID}}/delete">
+                <input type="submit" value="Delete">
+            </form>
         {{else}}
             <div>List is empty.</div>
         {{end}}
