@@ -112,3 +112,53 @@ func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	}
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
+
+// ----------------------------------------------
+func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
+	userID, ok := userIDFromContext(req.Context())
+	if !ok {
+		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	targetAssetIDTemp := req.PathValue("id")
+	targetAssetID, err := strconv.Atoi(targetAssetIDTemp)
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+
+	assetName := req.FormValue("asset_name")
+	creator := req.FormValue("creator")
+	shopURL := req.FormValue("shop_url")
+	memo := req.FormValue("memo")
+	category := req.FormValue("asset_category")
+
+	if assetName == "" || creator == "" || category == "" {
+		http.Error(w, "アセット名・制作者・カテゴリは必須です", http.StatusBadRequest)
+		return
+	}
+
+	result, err := s.pool.Exec(req.Context(),
+		`UPDATE ASSETS SET 
+		asset_name = $1, 
+		creator = $2, 
+		shop_url = $3,
+		memo = $4,
+		asset_category = $5
+		WHERE asset_id = $6 AND user_id = $7`,
+		assetName, creator, shopURL, memo, category, targetAssetID, userID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "UPDATE failed: %v\n", err)
+		http.Error(w, "db UPDATE fail", http.StatusInternalServerError)
+		return
+	}
+
+	countUpdate := result.RowsAffected()
+	if countUpdate == 0 {
+		http.NotFound(w, req)
+		return
+	}
+	http.Redirect(w, req, "/assets", http.StatusSeeOther)
+}
