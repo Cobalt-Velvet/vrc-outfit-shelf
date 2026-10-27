@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type Asset struct {
@@ -165,4 +168,46 @@ func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
+}
+
+func (s *server) editAssetForm(w http.ResponseWriter, req *http.Request) {
+	userID, ok := userIDFromContext(req.Context())
+	if !ok {
+		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	targetAssetIDTemp := req.PathValue("id")
+	targetAssetID, err := strconv.Atoi(targetAssetIDTemp)
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+
+	var asset Asset
+	err = s.pool.QueryRow(req.Context(),
+		`select asset_name, 
+				creator, 
+				COALESCE(shop_url, ''),
+				COALESCE(memo, ''),
+				asset_category from assets 
+		WHERE asset_id = $1 AND user_id = $2`,
+		targetAssetID, userID).Scan(
+		&asset.Name, &asset.Creator, &asset.ShopURL, &asset.Memo, &asset.Category)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		http.Error(w, "自分が所有しているAssetではないか、存在しないAssetです。", http.StatusNotFound)
+		return
+	}
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Select failed: %v\n", err)
+		http.Error(w, "db Select fail", http.StatusInternalServerError)
+		return
+	}
+
+	asset.ID = targetAssetID
+	if err := s.tmpl.ExecuteTemplate(w, "edit.html", asset); err != nil {
+		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+	}
 }

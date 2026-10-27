@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VRC Outfit Shelf</title>
+</head>
+<body>
+    <form method="post" action="/assets/{{.ID}}/edit">
+        category : <select name="asset_category">
+            <option {{if eq .Category "clothing"}}selected{{end}}>clothing</option>
+            <option {{if eq .Category "hair"}}selected{{end}}>hair</option>
+            <option {{if eq .Category "accessory"}}selected{{end}}>accessory</option>
+            <option {{if eq .Category "prop"}}selected{{end}}>prop</option>
+            <option {{if eq .Category "texture"}}selected{{end}}>texture</option>
+            <option {{if eq .Category "tool"}}selected{{end}}>tool</option>
+            <option {{if eq .Category "animation"}}selected{{end}}>animation</option>
+            <option {{if eq .Category "other"}}selected{{end}}>other</option>
+        </select>
+        <label>asset_name: <input name="asset_name" value="{{.Name}}"></label><br>
+        <label>creator: <input name="creator" value="{{.Creator}}"></label><br>
+        <label>shop_url: <input name="shop_url" value="{{.ShopURL}}"></label><br>
+        <label>memo: <input name="memo" value="{{.Memo}}"></label><br>
+        <input type="submit" value="save"><br>
+    </form>
+    <div>
+        <a href="/assets">assets</a>
+    </div>
+</body>
+</html>

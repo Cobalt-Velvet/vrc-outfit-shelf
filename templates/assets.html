@@ -27,6 +27,7 @@
     <div>
         {{range .}}
             <div>{{.Name}}</div>
+            <a href="/assets/{{.ID}}/edit">Edit</a>
             <form method="post" action="/assets/{{.ID}}/delete">
                 <input type="submit" value="Delete">
             </form>
