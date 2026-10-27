@@ -8,11 +8,15 @@ import (
 )
 
 type Asset struct {
-	Name string
-	ID   int
+	Name     string
+	ID       int
+	Creator  string
+	ShopURL  string
+	Memo     string
+	Category string
 }
 
-// -----------get asset name-----------
+// Showing Users' assets on /assets
 func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
@@ -50,7 +54,7 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// -----------post asset name-----------
+// Create assets using Form
 func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
@@ -81,7 +85,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
 
-// ------------------------------
+// Delete assets only owners if not, return 404
 func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
@@ -113,7 +117,7 @@ func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
 
-// ----------------------------------------------
+// Update assets only owners if not, return 404
 func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
