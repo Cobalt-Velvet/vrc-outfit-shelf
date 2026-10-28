@@ -56,7 +56,7 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Create assets using Form
+// Create assets using form
 func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
@@ -87,7 +87,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
 
-// Delete assets only owners if not, return 404
+// Delete assets only owners; otherwise returns 404
 func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
@@ -119,7 +119,7 @@ func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
 
-// Update assets only owners if not, return 404
+// Update assets only owners; otherwise returns 404
 func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
@@ -169,6 +169,7 @@ func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, "/assets", http.StatusSeeOther)
 }
 
+// Fetch & show current asset data from DB only owners; otherwise returns 404
 func (s *server) editAssetForm(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
