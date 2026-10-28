@@ -3,9 +3,8 @@ package main
 import (
 	"crypto/rand"
 	"errors"
-	"fmt"
+	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -15,7 +14,7 @@ import (
 
 func (s *server) signupForm(w http.ResponseWriter, req *http.Request) {
 	if err := s.tmpl.ExecuteTemplate(w, "signup.html", nil); err != nil {
-		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+		slog.Error("template execution failed", "err", err)
 	}
 }
 
@@ -30,7 +29,7 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "hashing failed: %v\n", err)
+		slog.Error("hashing failed", "err", err)
 		http.Error(w, "signup failed", http.StatusInternalServerError)
 		return
 	}
@@ -43,7 +42,7 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 			http.Error(w, "その名前は既に使われています", http.StatusConflict) //popup later
 			return
 		}
-		fmt.Fprintf(os.Stderr, "Insert failed: %v\n", err)
+		slog.Error("insert failed", "err", err)
 		http.Error(w, "db insert fail", http.StatusInternalServerError)
 		return
 	}
@@ -52,7 +51,7 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 
 func (s *server) signinForm(w http.ResponseWriter, req *http.Request) {
 	if err := s.tmpl.ExecuteTemplate(w, "signin.html", nil); err != nil {
-		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+		slog.Error("template execution failed", "err", err)
 	}
 }
 
@@ -83,7 +82,7 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
+		slog.Error("query failed", "err", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -100,7 +99,7 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 		"insert into sessions (session_id, user_id, expires_at) values ($1, $2, $3)",
 		sessionID, idCheck, expiresAt)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Session insert failed: %v\n", err)
+		slog.Error("session insert failed", "err", err, "user_id", idCheck)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -125,7 +124,7 @@ func (s *server) signout(w http.ResponseWriter, req *http.Request) {
 	}
 	_, err = s.pool.Exec(req.Context(), "delete from sessions where session_id = $1", cookie.Value)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Session delete failed: %v\n", err)
+		slog.Error("session delete failed", "err", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

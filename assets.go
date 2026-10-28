@@ -2,9 +2,8 @@ package main
 
 import (
 	"errors"
-	"fmt"
+	"log/slog"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
@@ -23,14 +22,14 @@ type Asset struct {
 func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
-		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		slog.Error("user ID not found in context")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	rows, err := s.pool.Query(req.Context(), "select asset_name, asset_id from assets where user_id = $1", userID)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Query failed: %v\n", err)
+		slog.Error("query failed", "err", err, "user_id", userID)
 		http.Error(w, "Query fail", http.StatusInternalServerError)
 		return
 	}
@@ -41,19 +40,19 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 		var assetName string
 		var assetID int
 		if err := rows.Scan(&assetName, &assetID); err != nil {
-			fmt.Fprintf(os.Stderr, "Scan failed: %v\n", err)
+			slog.Error("scan failed", "err", err, "user_id", userID)
 			http.Error(w, "Scan failed", http.StatusInternalServerError)
 			return
 		}
 		assets = append(assets, Asset{Name: assetName, ID: assetID})
 	}
 	if err := rows.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "rows failed: %v\n", err)
+		slog.Error("rows failed", "err", err, "user_id", userID)
 		http.Error(w, "db get fail", http.StatusInternalServerError)
 		return
 	}
 	if err := s.tmpl.ExecuteTemplate(w, "assets.html", assets); err != nil {
-		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+		slog.Error("template execution failed", "err", err, "user_id", userID)
 	}
 }
 
@@ -61,7 +60,7 @@ func (s *server) listAssets(w http.ResponseWriter, req *http.Request) {
 func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
-		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		slog.Error("user ID not found in context")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -81,7 +80,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 		`insert into assets (user_id, asset_name, creator, shop_url, memo, asset_category)
 			values ($1, $2, $3, $4, $5, $6)`, userID, assetName, creator, shopURL, memo, category)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Insert failed: %v\n", err)
+		slog.Error("insert failed", "err", err, "user_id", userID)
 		http.Error(w, "db insert fail", http.StatusInternalServerError)
 		return
 	}
@@ -92,7 +91,7 @@ func (s *server) createAsset(w http.ResponseWriter, req *http.Request) {
 func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
-		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		slog.Error("user ID not found in context")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -107,7 +106,7 @@ func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 	result, err := s.pool.Exec(req.Context(),
 		`DELETE FROM ASSETS WHERE asset_id = $1 AND user_id = $2`, targetAssetID, userID)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "DELETE failed: %v\n", err)
+		slog.Error("delete failed", "err", err, "user_id", userID, "asset_id", targetAssetID)
 		http.Error(w, "db DELETE fail", http.StatusInternalServerError)
 		return
 	}
@@ -124,7 +123,7 @@ func (s *server) deleteAsset(w http.ResponseWriter, req *http.Request) {
 func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
-		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		slog.Error("user ID not found in context")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -157,7 +156,7 @@ func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 		WHERE asset_id = $6 AND user_id = $7`,
 		assetName, creator, shopURL, memo, category, targetAssetID, userID)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "UPDATE failed: %v\n", err)
+		slog.Error("update failed", "err", err, "user_id", userID, "asset_id", targetAssetID)
 		http.Error(w, "db UPDATE fail", http.StatusInternalServerError)
 		return
 	}
@@ -173,7 +172,7 @@ func (s *server) updateAsset(w http.ResponseWriter, req *http.Request) {
 func (s *server) editAssetForm(w http.ResponseWriter, req *http.Request) {
 	userID, ok := userIDFromContext(req.Context())
 	if !ok {
-		fmt.Fprintf(os.Stderr, "user ID not found in context\n")
+		slog.Error("user ID not found in context")
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -201,13 +200,13 @@ func (s *server) editAssetForm(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Select failed: %v\n", err)
+		slog.Error("select failed", "err", err, "user_id", userID, "asset_id", targetAssetID)
 		http.Error(w, "db Select fail", http.StatusInternalServerError)
 		return
 	}
 
 	asset.ID = targetAssetID
 	if err := s.tmpl.ExecuteTemplate(w, "edit.html", asset); err != nil {
-		fmt.Fprintf(os.Stderr, "Template execution failed: %v\n", err)
+		slog.Error("template execution failed", "err", err, "user_id", userID, "asset_id", targetAssetID)
 	}
 }

@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -15,14 +14,14 @@ func main() {
 	// db connect
 	pool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		slog.Error("unable to connect to database", "err", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
 
 	tmpl, err := template.ParseGlob("templates/*.html")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to read HTML: %v\n", err)
+		slog.Error("unable to read HTML", "err", err)
 		os.Exit(1)
 	}
 
@@ -41,5 +40,8 @@ func main() {
 	mux.HandleFunc("POST /signin", srv.signin)
 	mux.HandleFunc("POST /signout", srv.signout)
 
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		slog.Error("server stopped", "err", err)
+		os.Exit(1)
+	}
 }

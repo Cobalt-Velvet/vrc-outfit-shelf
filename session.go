@@ -3,9 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
+	"log/slog"
 	"net/http"
-	"os"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -42,7 +41,7 @@ func (s *server) requireLogin(next http.Handler) http.Handler {
 			return
 		}
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Session check failed: %v\n", err)
+			slog.Error("session check failed", "err", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
