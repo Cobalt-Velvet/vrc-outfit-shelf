@@ -137,7 +137,7 @@ func TestSigninSuccess(t *testing.T) {
 		t.Errorf("signin status = %v, want %v", rec2.Code, want)
 	}
 
-	wantLocation := "/assets"
+	wantLocation := "/avatars"
 	if rec2.Result().Header.Get("Location") != wantLocation {
 		t.Errorf("location = %v, want %v", rec2.Result().Header.Get("Location"), wantLocation)
 	}

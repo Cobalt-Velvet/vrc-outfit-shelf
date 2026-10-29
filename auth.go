@@ -113,7 +113,7 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	http.Redirect(w, req, "/assets", http.StatusSeeOther)
+	http.Redirect(w, req, "/avatars", http.StatusSeeOther)
 }
 
 func (s *server) signout(w http.ResponseWriter, req *http.Request) {
