@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VRC Outfit Shelf</title>
+</head>
+<body>
+    <div>
+        <div>{{.Avatar.Name}}</div>
+        <div>{{.Avatar.Creator}}</div>
+        <div>{{.Avatar.ShopURL}}</div>
+        <div>{{.Avatar.Memo}}</div>
+        {{range .Assets}}
+            <div>{{.Name}}</div>
+        {{else}}
+            <div>No assets linked yet.</div>
+        {{end}}
+    </div>
+    <div>
+        <form method="post" action="/signout">
+            <input type="submit" value="signout">
+        </form>
+    </div>
+    <div>
+        <a href="/avatars">avatars</a>
+    </div>
+</body>
+</html>

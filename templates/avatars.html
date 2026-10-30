@@ -16,7 +16,9 @@
 
     <div>
         {{range .}}
-            <div>{{.Name}}</div>
+            <div>
+                <a href="/avatars/{{.ID}}">{{.Name}}</a>
+            </div>
         {{else}}
             <div>List is empty.</div>
         {{end}}
