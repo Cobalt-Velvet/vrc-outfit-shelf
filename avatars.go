@@ -18,8 +18,9 @@ type Avatar struct {
 }
 
 type avatarPage struct {
-	Avatar Avatar
-	Assets []Asset
+	Avatar    Avatar
+	Assets    []Asset
+	OwnAssets []Asset
 }
 
 func (s *server) listAvatars(w http.ResponseWriter, req *http.Request) {
@@ -154,7 +155,32 @@ func (s *server) showAvatar(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	page := avatarPage{Avatar: avatar, Assets: assets}
+	rows, err = s.pool.Query(req.Context(), "select asset_name, asset_id from assets where user_id = $1", userID)
+	if err != nil {
+		slog.Error("query failed", "err", err, "user_id", userID, "avatar_id", targetAvatarID)
+		http.Error(w, "Query fail", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var ownAssets []Asset
+	for rows.Next() {
+		var assetName string
+		var assetID int
+		if err := rows.Scan(&assetName, &assetID); err != nil {
+			slog.Error("scan failed", "err", err, "user_id", userID, "avatar_id", targetAvatarID)
+			http.Error(w, "Scan failed", http.StatusInternalServerError)
+			return
+		}
+		ownAssets = append(ownAssets, Asset{Name: assetName, ID: assetID})
+	}
+	if err := rows.Err(); err != nil {
+		slog.Error("rows failed", "err", err, "user_id", userID, "avatar_id", targetAvatarID)
+		http.Error(w, "db get fail", http.StatusInternalServerError)
+		return
+	}
+
+	page := avatarPage{Avatar: avatar, Assets: assets, OwnAssets: ownAssets}
 	if err := s.tmpl.ExecuteTemplate(w, "avatar.html", page); err != nil {
 		slog.Error("template execution failed", "err", err, "user_id", userID, "avatar_id", targetAvatarID)
 	}
