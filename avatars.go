@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type Avatar struct {
@@ -184,4 +185,52 @@ func (s *server) showAvatar(w http.ResponseWriter, req *http.Request) {
 	if err := s.tmpl.ExecuteTemplate(w, "avatar.html", page); err != nil {
 		slog.Error("template execution failed", "err", err, "user_id", userID, "avatar_id", targetAvatarID)
 	}
+}
+
+func (s *server) linkAsset(w http.ResponseWriter, req *http.Request) {
+	userID, ok := userIDFromContext(req.Context())
+	if !ok {
+		slog.Error("user ID not found in context")
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	targetAvatarIDTemp := req.PathValue("id")
+	targetAvatarID, err := strconv.Atoi(targetAvatarIDTemp)
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+
+	targetLinkAssetIDTemp := req.FormValue("asset_id")
+	targetLinkAssetID, err := strconv.Atoi(targetLinkAssetIDTemp)
+	if err != nil {
+		http.Error(w, "Status Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	checkResultRow, err := s.pool.Exec(req.Context(),
+		`INSERT INTO compatibility (avatar_id, asset_id)
+	SELECT $1, $2
+	WHERE EXISTS (SELECT 1 FROM avatars WHERE avatar_id = $1 AND user_id = $3)
+	AND EXISTS (SELECT 1 FROM assets WHERE asset_id = $2 AND user_id = $3)`, targetAvatarID, targetLinkAssetID, userID)
+	var pgErr *pgconn.PgError
+
+	if err != nil {
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			slog.Info("duplicate key", "err", err, "avatar_id", targetAvatarID, "asset_id", targetLinkAssetID, "user_id", userID)
+			http.Redirect(w, req, "/avatars/"+strconv.Itoa(targetAvatarID), http.StatusSeeOther)
+			return
+		}
+		slog.Error("insert failed", "err", err, "avatar_id", targetAvatarID, "asset_id", targetLinkAssetID, "user_id", userID)
+		http.Error(w, "db insert fail", http.StatusInternalServerError)
+		return
+	}
+
+	if checkResultRow.RowsAffected() == 0 {
+		http.NotFound(w, req)
+		return
+	}
+
+	http.Redirect(w, req, "/avatars/"+strconv.Itoa(targetAvatarID), http.StatusSeeOther)
 }
