@@ -22,6 +22,15 @@
             <input type="submit" value="signout">
         </form>
     </div>
+
+    <form method="post" action="/avatars/{{.Avatar.ID}}/assets">
+        <select name="asset_id">
+            {{range .OwnAssets}}
+            <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+        </select>
+        <input type="submit" value="LinkMyAssets">
+    </form>
     <div>
         <a href="/avatars">avatars</a>
     </div>
