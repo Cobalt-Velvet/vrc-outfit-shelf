@@ -1,11 +1,9 @@
 package main
 
 import (
-	"crypto/rand"
 	"errors"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -93,25 +91,12 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	//session
-	sessionID := rand.Text()
-	expiresAt := time.Now().Add(7 * 24 * time.Hour)
-	_, err = s.pool.Exec(req.Context(),
-		"insert into sessions (session_id, user_id, expires_at) values ($1, $2, $3)",
-		sessionID, idCheck, expiresAt)
+	err = s.createSession(w, req, idCheck)
 	if err != nil {
-		slog.Error("session insert failed", "err", err, "user_id", idCheck)
+		slog.Error("session create failed", "err", err, "user_id", idCheck)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
-		Path:     "/",
-		Expires:  expiresAt,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
-	})
 
 	http.Redirect(w, req, "/avatars", http.StatusSeeOther)
 }

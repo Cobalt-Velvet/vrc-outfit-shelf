@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -58,8 +60,26 @@ func userIDFromContext(ctx context.Context) (int, bool) {
 	return id, ok
 }
 
-func (s *server) createSession() {
+func (s *server) createSession(w http.ResponseWriter, req *http.Request, userID int) error {
+	sessionID := rand.Text()
+	expiresAt := time.Now().Add(7 * 24 * time.Hour)
+	_, err := s.pool.Exec(req.Context(),
+		"insert into sessions (session_id, user_id, expires_at) values ($1, $2, $3)",
+		sessionID, userID, expiresAt)
+	if err != nil {
+		return err
+	}
 
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Path:     "/",
+		Expires:  expiresAt,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	return nil
 }
 
 func (s *server) deleteSession(w http.ResponseWriter, req *http.Request) error {
