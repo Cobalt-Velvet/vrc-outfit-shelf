@@ -79,4 +79,5 @@ func (s *server) deleteSession(w http.ResponseWriter, req *http.Request) error {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	})
+	return nil
 }
