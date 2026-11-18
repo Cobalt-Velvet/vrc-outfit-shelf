@@ -77,6 +77,7 @@ func (s *server) createSession(w http.ResponseWriter, req *http.Request, userID 
 		Expires:  expiresAt,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+		Secure:   s.secureCookie,
 	})
 
 	return nil
@@ -98,6 +99,7 @@ func (s *server) deleteSession(w http.ResponseWriter, req *http.Request) error {
 		MaxAge:   -1,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+		Secure:   s.secureCookie,
 	})
 	return nil
 }

@@ -25,7 +25,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	srv := &server{pool: pool, tmpl: tmpl}
+	secureCookie := os.Getenv("COOKIE_SECURE") == "true"
+
+	srv := &server{pool: pool, tmpl: tmpl, secureCookie: secureCookie}
 
 	mux := http.NewServeMux()
 
@@ -48,6 +50,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
 	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		slog.Error("server stopped", "err", err)
 		os.Exit(1)

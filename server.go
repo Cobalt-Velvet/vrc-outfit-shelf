@@ -7,6 +7,7 @@ import (
 )
 
 type server struct {
-	pool *pgxpool.Pool
-	tmpl *template.Template
+	pool         *pgxpool.Pool
+	tmpl         *template.Template
+	secureCookie bool
 }
