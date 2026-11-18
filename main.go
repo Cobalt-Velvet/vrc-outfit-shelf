@@ -44,7 +44,11 @@ func main() {
 	mux.HandleFunc("POST /signin", srv.signin)
 	mux.HandleFunc("POST /signout", srv.signout)
 
-	if err := http.ListenAndServe(":8080", mux); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		slog.Error("server stopped", "err", err)
 		os.Exit(1)
 	}
