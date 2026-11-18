@@ -58,10 +58,25 @@ func userIDFromContext(ctx context.Context) (int, bool) {
 	return id, ok
 }
 
-func createSession() {
+func (s *server) createSession() {
 
 }
 
-func deleteSession() {
-
+func (s *server) deleteSession(w http.ResponseWriter, req *http.Request) error {
+	cookie, err := req.Cookie("session_id")
+	if err != nil {
+		return errNotLoggedIn
+	}
+	_, err = s.pool.Exec(req.Context(), "delete from sessions where session_id = $1", cookie.Value)
+	if err != nil {
+		return err
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_id",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	})
 }

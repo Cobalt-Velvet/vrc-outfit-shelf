@@ -117,22 +117,15 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *server) signout(w http.ResponseWriter, req *http.Request) {
-	cookie, err := req.Cookie("session_id")
-	if err != nil {
+	err := s.deleteSession(w, req)
+	if errors.Is(err, errNotLoggedIn) {
 		http.Redirect(w, req, "/signin", http.StatusSeeOther)
 		return
 	}
-	_, err = s.pool.Exec(req.Context(), "delete from sessions where session_id = $1", cookie.Value)
 	if err != nil {
 		slog.Error("session delete failed", "err", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	http.SetCookie(w, &http.Cookie{
-		Name:   "session_id",
-		Value:  "",
-		Path:   "/",
-		MaxAge: -1,
-	})
 	http.Redirect(w, req, "/signin", http.StatusSeeOther)
 }
