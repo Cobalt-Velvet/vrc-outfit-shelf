@@ -6,24 +6,26 @@
     <title>VRC Outfit Shelf</title>
 </head>
 <body>
-    <form method="post" action="/signin">
-        <label>
-            VRC Name: 
-            <input name="vrc_name" type="text" required>
-        </label>
-        <br>
+    <header>
+        <nav>
+            <a href="/signup">signup</a>
+        </nav>
+    </header>
 
-        <label>
-            Password: 
-            <input name="password" type="password" required>
-        </label>
-        <br>
+    <main>
+        <h1>ログイン</h1>
         
-        <input type="submit" value="submit"><br>
-    </form>
-    <a href="/signup">
-        -> signup
-    </a>
-
+        <form method="post" action="/signin">
+            <label>
+                VRC Name: <input name="vrc_name" type="text" required>
+            </label>
+            <br>
+            <label>
+            Password: <input name="password" type="password" required>
+            </label>
+            <br>
+            <input type="submit" value="submit"><br>
+        </form>
+    </main>
 </body>
 </html>

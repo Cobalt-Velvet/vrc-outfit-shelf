@@ -6,30 +6,35 @@
     <title>VRC Outfit Shelf</title>
 </head>
 <body>
-    <form method="post" action="/avatars">
-        <label>avatar_name: <input name="avatar_name"></label><br>
-        <label>creator: <input name="creator"></label><br>
-        <label>shop_url: <input name="shop_url"></label><br>
-        <label>memo: <input name="memo"></label><br>
-        <input type="submit" value="submit"><br>
-    </form>
+    <header>
+        <nav>
+            <a href="/assets">assets</a>
+            <form method="post" action="/signout">
+                <input type="submit" value="signout">
+            </form>
+        </nav>
+    </header>
 
-    <div>
-        {{range .}}
-            <div>
-                <a href="/avatars/{{.ID}}">{{.Name}}</a>
-            </div>
-        {{else}}
-            <div>List is empty.</div>
-        {{end}}
-    </div>
-    <div>
-        <form method="post" action="/signout">
-            <input type="submit" value="signout">
+    <main>
+        <h1>アバター一覧</h1>
+
+        <form method="post" action="/avatars">
+            <label>avatar_name: <input name="avatar_name"></label><br>
+            <label>creator: <input name="creator"></label><br>
+            <label>shop_url: <input name="shop_url"></label><br>
+            <label>memo: <input name="memo"></label><br>
+            <input type="submit" value="submit"><br>
         </form>
-    </div>
-    <div>
-        <a href="/assets">assets</a>
-    </div>
+
+        <ul>
+            {{range .}}
+                <li>
+                    <a href="/avatars/{{.ID}}">{{.Name}}</a>
+                </li>
+            {{else}}
+                <li>List is empty.</li>
+            {{end}}
+        </ul>
+    </main>
 </body>
 </html>

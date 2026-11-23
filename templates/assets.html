@@ -6,42 +6,48 @@
     <title>VRC Outfit Shelf</title>
 </head>
 <body>
-    <form method="post" action="/assets">
-        category : <select name="asset_category">
-            <option>clothing</option>
-            <option>hair</option>
-            <option>accessory</option>
-            <option>prop</option>
-            <option>texture</option>
-            <option>tool</option>
-            <option>animation</option>
-            <option>other</option>
-        </select>
-        <label>asset_name: <input name="asset_name"></label><br>
-        <label>creator: <input name="creator"></label><br>
-        <label>shop_url: <input name="shop_url"></label><br>
-        <label>memo: <input name="memo"></label><br>
-        <input type="submit" value="submit"><br>
-    </form>
-
-    <div>
-        {{range .}}
-            <div>{{.Name}}</div>
-            <a href="/assets/{{.ID}}/edit">Edit</a>
-            <form method="post" action="/assets/{{.ID}}/delete">
-                <input type="submit" value="Delete">
+    <header>
+        <nav>
+            <a href="/avatars">avatars</a>
+            <form method="post" action="/signout">
+                <input type="submit" value="signout">
             </form>
-        {{else}}
-            <div>List is empty.</div>
-        {{end}}
-    </div>
-    <div>
-        <form method="post" action="/signout">
-            <input type="submit" value="signout">
+        </nav>
+    </header>
+
+    <main>
+        <h1>アセット一覧</h1>
+
+        <form method="post" action="/assets">
+            category : <select name="asset_category">
+                <option>clothing</option>
+                <option>hair</option>
+                <option>accessory</option>
+                <option>prop</option>
+                <option>texture</option>
+                <option>tool</option>
+                <option>animation</option>
+                <option>other</option>
+            </select>
+            <label>asset_name: <input name="asset_name"></label><br>
+            <label>creator: <input name="creator"></label><br>
+            <label>shop_url: <input name="shop_url"></label><br>
+            <label>memo: <input name="memo"></label><br>
+            <input type="submit" value="submit"><br>
         </form>
-    </div>
-    <div>
-        <a href="/avatars">avatars</a>
-    </div>
+        <ul>
+            {{range .}}
+                <li>
+                    {{.Name}}
+                    <a href="/assets/{{.ID}}/edit">Edit</a>
+                    <form method="post" action="/assets/{{.ID}}/delete">
+                        <input type="submit" value="Delete">
+                    </form>
+                </li>
+            {{else}}
+                <li>List is empty.</li>
+            {{end}}
+        </ul>
+    </main>
 </body>
 </html>

@@ -6,33 +6,42 @@
     <title>VRC Outfit Shelf</title>
 </head>
 <body>
-    <div>
-        <div>{{.Avatar.Name}}</div>
-        <div>{{.Avatar.Creator}}</div>
-        <div>{{.Avatar.ShopURL}}</div>
-        <div>{{.Avatar.Memo}}</div>
-        {{range .Assets}}
-            <div>{{.Name}}</div>
-        {{else}}
-            <div>No assets linked yet.</div>
-        {{end}}
-    </div>
-    <div>
-        <form method="post" action="/signout">
-            <input type="submit" value="signout">
-        </form>
-    </div>
+    <header>
+        <nav>
+            <a href="/avatars">avatars</a>
+            <form method="post" action="/signout">
+                <input type="submit" value="signout">
+            </form>
+        </nav>
+    </header>
 
-    <form method="post" action="/avatars/{{.Avatar.ID}}/assets">
-        <select name="asset_id">
-            {{range .OwnAssets}}
-            <option value="{{.ID}}">{{.Name}}</option>
+    <main>
+        <h1>{{.Avatar.Name}}</h1>
+
+        <p>{{.Avatar.Creator}}</p>
+        <p>{{.Avatar.ShopURL}}</p>
+        <p>{{.Avatar.Memo}}</p>
+
+        <h2>対応アセット</h2>
+
+        <ul>
+            {{range .Assets}}
+                <li>{{.Name}}</li>
+            {{else}}
+                <li>No assets linked yet.</li>
             {{end}}
-        </select>
-        <input type="submit" value="LinkMyAssets">
-    </form>
-    <div>
-        <a href="/avatars">avatars</a>
-    </div>
+        </ul>
+
+        <h2>アセットを追加</h2>
+
+        <form method="post" action="/avatars/{{.Avatar.ID}}/assets">
+            <select name="asset_id">
+                {{range .OwnAssets}}
+                <option value="{{.ID}}">{{.Name}}</option>
+                {{end}}
+            </select>
+            <input type="submit" value="LinkMyAssets">
+        </form>
+    </main>
 </body>
 </html>
