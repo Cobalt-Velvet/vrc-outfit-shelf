@@ -10,6 +10,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func (s *server) index(w http.ResponseWriter, req *http.Request) {
+	if err := s.tmpl.ExecuteTemplate(w, "index.html", nil); err != nil {
+		slog.Error("template execution failed", "err", err)
+	}
+}
+
 func (s *server) signupForm(w http.ResponseWriter, req *http.Request) {
 	if err := s.tmpl.ExecuteTemplate(w, "signup.html", nil); err != nil {
 		slog.Error("template execution failed", "err", err)

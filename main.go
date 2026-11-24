@@ -40,6 +40,7 @@ func main() {
 	mux.Handle("POST /avatars", srv.requireLogin(http.HandlerFunc(srv.createAvatar)))
 	mux.Handle("GET /avatars/{id}", srv.requireLogin(http.HandlerFunc(srv.showAvatar)))
 	mux.Handle("POST /avatars/{id}/assets", srv.requireLogin(http.HandlerFunc(srv.linkAsset)))
+	mux.HandleFunc("GET /{$}", srv.index)
 	mux.HandleFunc("GET /signup", srv.signupForm)
 	mux.HandleFunc("POST /signup", srv.signup)
 	mux.HandleFunc("GET /signin", srv.signinForm)
