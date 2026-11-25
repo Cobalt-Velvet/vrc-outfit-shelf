@@ -46,6 +46,7 @@ func main() {
 	mux.HandleFunc("GET /signin", srv.signinForm)
 	mux.HandleFunc("POST /signin", srv.signin)
 	mux.HandleFunc("POST /signout", srv.signout)
+	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	port := os.Getenv("PORT")
 	if port == "" {
