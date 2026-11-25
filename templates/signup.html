@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VRC Outfit Shelf</title>
+    <title>会員登録 | VRC Outfit Shelf</title>
 </head>
 <body>
     <header>
         <nav>
-            <a href="/signin">signin</a>
+            <a href="/">トップ</a>
+            <a href="/signin">ログイン</a>
         </nav>
     </header>
 
@@ -17,14 +18,14 @@
 
         <form method="post" action="/signup">
             <label>
-                VRC Name: <input name="vrc_name" type="text" required>
+                VRChat名
+                <input name="vrc_name" type="text" autocomplete="username" required>
             </label>
-            <br>
             <label>
-                Password: <input name="password" type="password" required>
+                パスワード
+                <input name="password" type="password" autocomplete="new-password" required>
             </label>
-            <br>
-            <input type="submit" value="submit"><br>
+            <button type="submit">登録</button>
         </form>
     </main>
 </body>

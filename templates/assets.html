@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VRC Outfit Shelf</title>
+    <title>アセット一覧 | VRC Outfit Shelf</title>
 </head>
 <body>
     <header>
         <nav>
-            <a href="/avatars">avatars</a>
+            <a href="/avatars">アバター</a>
+            <a href="/assets">アセット</a>
             <form method="post" action="/signout">
-                <input type="submit" value="signout">
+                <button type="submit">ログアウト</button>
             </form>
         </nav>
     </header>
@@ -18,36 +19,42 @@
     <main>
         <h1>アセット一覧</h1>
 
-        <form method="post" action="/assets">
-            category : <select name="asset_category">
-                <option>clothing</option>
-                <option>hair</option>
-                <option>accessory</option>
-                <option>prop</option>
-                <option>texture</option>
-                <option>tool</option>
-                <option>animation</option>
-                <option>other</option>
-            </select>
-            <label>asset_name: <input name="asset_name"></label><br>
-            <label>creator: <input name="creator"></label><br>
-            <label>shop_url: <input name="shop_url"></label><br>
-            <label>memo: <input name="memo"></label><br>
-            <input type="submit" value="submit"><br>
-        </form>
         <ul>
             {{range .}}
                 <li>
                     {{.Name}}
-                    <a href="/assets/{{.ID}}/edit">Edit</a>
+                    <a href="/assets/{{.ID}}/edit">編集</a>
                     <form method="post" action="/assets/{{.ID}}/delete">
-                        <input type="submit" value="Delete">
+                        <button type="submit">削除</button>
                     </form>
                 </li>
             {{else}}
-                <li>List is empty.</li>
+                <li>まだアセットが登録されていません。</li>
             {{end}}
         </ul>
+
+        <h2>アセットを登録</h2>
+
+        <form method="post" action="/assets">
+            <label>
+                カテゴリ
+                <select name="asset_category">
+                    <option value="clothing">衣装</option>
+                    <option value="hair">髪</option>
+                    <option value="accessory">アクセサリー</option>
+                    <option value="prop">小物</option>
+                    <option value="texture">テクスチャ</option>
+                    <option value="tool">ツール</option>
+                    <option value="animation">アニメーション</option>
+                    <option value="other">その他</option>
+                </select>
+            </label>
+            <label>アセット名 <input name="asset_name" required></label>
+            <label>制作者 <input name="creator" required></label>
+            <label>ショップURL <input name="shop_url"></label>
+            <label>メモ <input name="memo"></label>
+            <button type="submit">登録</button>
+        </form>
     </main>
 </body>
 </html>

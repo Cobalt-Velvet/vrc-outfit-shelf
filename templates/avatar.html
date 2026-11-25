@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VRC Outfit Shelf</title>
+    <title>{{.Avatar.Name}} | VRC Outfit Shelf</title>
 </head>
 <body>
     <header>
         <nav>
-            <a href="/avatars">avatars</a>
+            <a href="/avatars">アバター</a>
+            <a href="/assets">アセット</a>
             <form method="post" action="/signout">
-                <input type="submit" value="signout">
+                <button type="submit">ログアウト</button>
             </form>
         </nav>
     </header>
@@ -18,9 +19,18 @@
     <main>
         <h1>{{.Avatar.Name}}</h1>
 
-        <p>{{.Avatar.Creator}}</p>
-        <p>{{.Avatar.ShopURL}}</p>
-        <p>{{.Avatar.Memo}}</p>
+        <dl>
+            <dt>制作者</dt>
+            <dd>{{.Avatar.Creator}}</dd>
+            {{with .Avatar.ShopURL}}
+                <dt>ショップURL</dt>
+                <dd><a href="{{.}}">{{.}}</a></dd>
+            {{end}}
+            {{with .Avatar.Memo}}
+                <dt>メモ</dt>
+                <dd>{{.}}</dd>
+            {{end}}
+        </dl>
 
         <h2>対応アセット</h2>
 
@@ -28,20 +38,27 @@
             {{range .Assets}}
                 <li>{{.Name}}</li>
             {{else}}
-                <li>No assets linked yet.</li>
+                <li>まだ対応付けられたアセットはありません。</li>
             {{end}}
         </ul>
 
         <h2>アセットを追加</h2>
 
-        <form method="post" action="/avatars/{{.Avatar.ID}}/assets">
-            <select name="asset_id">
-                {{range .OwnAssets}}
-                <option value="{{.ID}}">{{.Name}}</option>
-                {{end}}
-            </select>
-            <input type="submit" value="LinkMyAssets">
-        </form>
+        {{if .OwnAssets}}
+            <form method="post" action="/avatars/{{.Avatar.ID}}/assets">
+                <label>
+                    アセット
+                    <select name="asset_id">
+                        {{range .OwnAssets}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </label>
+                <button type="submit">追加</button>
+            </form>
+        {{else}}
+            <p>先に<a href="/assets">アセット一覧</a>からアセットを登録してください。</p>
+        {{end}}
     </main>
 </body>
 </html>

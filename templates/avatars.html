@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VRC Outfit Shelf</title>
+    <title>アバター一覧 | VRC Outfit Shelf</title>
 </head>
 <body>
     <header>
         <nav>
-            <a href="/assets">assets</a>
+            <a href="/avatars">アバター</a>
+            <a href="/assets">アセット</a>
             <form method="post" action="/signout">
-                <input type="submit" value="signout">
+                <button type="submit">ログアウト</button>
             </form>
         </nav>
     </header>
@@ -18,23 +19,25 @@
     <main>
         <h1>アバター一覧</h1>
 
-        <form method="post" action="/avatars">
-            <label>avatar_name: <input name="avatar_name"></label><br>
-            <label>creator: <input name="creator"></label><br>
-            <label>shop_url: <input name="shop_url"></label><br>
-            <label>memo: <input name="memo"></label><br>
-            <input type="submit" value="submit"><br>
-        </form>
-
         <ul>
             {{range .}}
                 <li>
                     <a href="/avatars/{{.ID}}">{{.Name}}</a>
                 </li>
             {{else}}
-                <li>List is empty.</li>
+                <li>まだアバターが登録されていません。</li>
             {{end}}
         </ul>
+
+        <h2>アバターを登録</h2>
+
+        <form method="post" action="/avatars">
+            <label>アバター名 <input name="avatar_name" required></label>
+            <label>制作者 <input name="creator" required></label>
+            <label>ショップURL <input name="shop_url"></label>
+            <label>メモ <input name="memo"></label>
+            <button type="submit">登録</button>
+        </form>
     </main>
 </body>
 </html>
