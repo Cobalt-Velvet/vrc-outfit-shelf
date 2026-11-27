@@ -1,5 +1,5 @@
-INSERT INTO users (vrc_name, password_hash) VALUES
-    ('vrc_name', 'example_hash');
+INSERT INTO users (login_id, password_hash) VALUES
+    ('seed_user', 'example_hash');
 INSERT INTO avatars (user_id, avatar_name, creator, shop_url, memo) VALUES
     (1, 'avatar_name1', 'creator_name1', 'example_url', 'hoge'),
     (1, 'avatar_name2', 'creator_name1', NULL, 'hoge');

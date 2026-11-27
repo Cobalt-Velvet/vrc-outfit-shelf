@@ -23,11 +23,11 @@ func (s *server) signupForm(w http.ResponseWriter, req *http.Request) {
 }
 
 func (s *server) signup(w http.ResponseWriter, req *http.Request) {
-	vrcName := req.FormValue("vrc_name")
+	loginID := req.FormValue("login_id")
 	password := req.FormValue("password")
 
-	if vrcName == "" || password == "" {
-		http.Error(w, "ユーザー名とパスワードを入力してください", http.StatusBadRequest)
+	if loginID == "" || password == "" {
+		http.Error(w, "ユーザーIDとパスワードを入力してください", http.StatusBadRequest)
 		return
 	}
 
@@ -39,7 +39,7 @@ func (s *server) signup(w http.ResponseWriter, req *http.Request) {
 	}
 
 	_, err = s.pool.Exec(req.Context(),
-		"insert into users (vrc_name, password_hash) values ($1, $2)", vrcName, string(hashedPassword))
+		"insert into users (login_id, password_hash) values ($1, $2)", loginID, string(hashedPassword))
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
@@ -61,11 +61,11 @@ func (s *server) signinForm(w http.ResponseWriter, req *http.Request) {
 
 func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 
-	vrcName := req.FormValue("vrc_name")
+	loginID := req.FormValue("login_id")
 	password := req.FormValue("password")
 
-	if vrcName == "" || password == "" {
-		http.Error(w, "ユーザー名とパスワードを入力してください", http.StatusBadRequest)
+	if loginID == "" || password == "" {
+		http.Error(w, "ユーザーIDとパスワードを入力してください", http.StatusBadRequest)
 		return
 	}
 
@@ -73,15 +73,15 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 	var hashCheck string
 
 	err := s.pool.QueryRow(req.Context(),
-		"select user_id, password_hash from users where vrc_name = $1",
-		vrcName,
+		"select user_id, password_hash from users where login_id = $1",
+		loginID,
 	).Scan(&idCheck, &hashCheck)
 
 	// TODO: run bcrypt against a dummy hash when the user is not found,
 	// so response time doesn't reveal whether the name is registered
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		http.Error(w, "ユーザー名またはパスワードが正しくありません", http.StatusUnauthorized)
+		http.Error(w, "ユーザーIDまたはパスワードが正しくありません", http.StatusUnauthorized)
 		return
 	}
 
@@ -92,7 +92,7 @@ func (s *server) signin(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(hashCheck), []byte(password)); err != nil {
-		http.Error(w, "ユーザー名またはパスワードが正しくありません", http.StatusUnauthorized)
+		http.Error(w, "ユーザーIDまたはパスワードが正しくありません", http.StatusUnauthorized)
 		return
 	}
 

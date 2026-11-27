@@ -33,7 +33,7 @@ func TestSignupEmptyName(t *testing.T) {
 
 func TestSignupEmptyPassword(t *testing.T) {
 	srv := &server{}
-	req := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring"))
+	req := httptest.NewRequest("POST", "/signup", strings.NewReader("login_id=teststring"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 
@@ -45,7 +45,7 @@ func TestSignupEmptyPassword(t *testing.T) {
 }
 func TestSignupSuccess(t *testing.T) {
 	srv := newTestServer(t)
-	req := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req := httptest.NewRequest("POST", "/signup", strings.NewReader("login_id=teststring&password=teststring"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 
@@ -63,10 +63,10 @@ func TestSignupSuccess(t *testing.T) {
 
 func TestSignupDuplicate(t *testing.T) {
 	srv := newTestServer(t)
-	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("login_id=teststring&password=teststring"))
 	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec1 := httptest.NewRecorder()
-	req2 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req2 := httptest.NewRequest("POST", "/signup", strings.NewReader("login_id=teststring&password=teststring"))
 	req2.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec2 := httptest.NewRecorder()
 
@@ -107,7 +107,7 @@ func TestSigninEmptyName(t *testing.T) {
 
 func TestSigninEmptyPassword(t *testing.T) {
 	srv := &server{}
-	req := httptest.NewRequest("POST", "/signin", strings.NewReader("vrc_name=teststring"))
+	req := httptest.NewRequest("POST", "/signin", strings.NewReader("login_id=teststring"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 
@@ -119,10 +119,10 @@ func TestSigninEmptyPassword(t *testing.T) {
 }
 func TestSigninSuccess(t *testing.T) {
 	srv := newTestServer(t)
-	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("login_id=teststring&password=teststring"))
 	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec1 := httptest.NewRecorder()
-	req2 := httptest.NewRequest("POST", "/signin", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req2 := httptest.NewRequest("POST", "/signin", strings.NewReader("login_id=teststring&password=teststring"))
 	req2.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec2 := httptest.NewRecorder()
 
@@ -161,7 +161,7 @@ func TestSigninSuccess(t *testing.T) {
 
 func TestSigninUnknownUser(t *testing.T) {
 	srv := newTestServer(t)
-	req := httptest.NewRequest("POST", "/signin", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req := httptest.NewRequest("POST", "/signin", strings.NewReader("login_id=teststring&password=teststring"))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec := httptest.NewRecorder()
 
@@ -174,10 +174,10 @@ func TestSigninUnknownUser(t *testing.T) {
 
 func TestSigninWrongPassword(t *testing.T) {
 	srv := newTestServer(t)
-	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("vrc_name=teststring&password=teststring"))
+	req1 := httptest.NewRequest("POST", "/signup", strings.NewReader("login_id=teststring&password=teststring"))
 	req1.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec1 := httptest.NewRecorder()
-	req2 := httptest.NewRequest("POST", "/signin", strings.NewReader("vrc_name=teststring&password=testwrongstring"))
+	req2 := httptest.NewRequest("POST", "/signin", strings.NewReader("login_id=teststring&password=testwrongstring"))
 	req2.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	rec2 := httptest.NewRecorder()
 

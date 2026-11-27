@@ -11,7 +11,7 @@ import (
 func TestCreateAvatarSuccess(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -64,7 +64,7 @@ func TestCreateAvatarEmptyName(t *testing.T) {
 func TestLinkAssetOwner(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -112,7 +112,7 @@ func TestLinkAssetOwner(t *testing.T) {
 func TestLinkAssetNotOwnerAsset(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge2')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -155,7 +155,7 @@ func TestLinkAssetNotOwnerAsset(t *testing.T) {
 func TestLinkAssetNotOwnerAvatar(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge2')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -198,7 +198,7 @@ func TestLinkAssetNotOwnerAvatar(t *testing.T) {
 func TestLinkAssetDuplicate(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)

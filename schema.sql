@@ -12,7 +12,7 @@ DROP TYPE IF EXISTS category;
 
 CREATE TABLE users (
     user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    vrc_name VARCHAR(16) UNIQUE NOT NULL,
+    login_id VARCHAR(16) UNIQUE NOT NULL,
     password_hash TEXT NOT NULL
 );
 

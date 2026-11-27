@@ -11,7 +11,7 @@ import (
 func TestDeleteAssetNotOwner(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -48,7 +48,7 @@ func TestDeleteAssetNotOwner(t *testing.T) {
 func TestDeleteAssetOwner(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -85,7 +85,7 @@ func TestDeleteAssetOwner(t *testing.T) {
 func TestUpdateAssetOwner(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
@@ -122,7 +122,7 @@ func TestUpdateAssetOwner(t *testing.T) {
 func TestUpdateAssetNotOwner(t *testing.T) {
 	srv := newTestServer(t)
 	_, err := srv.pool.Exec(context.Background(), `
-	INSERT INTO USERS (vrc_name, password_hash) 
+	INSERT INTO USERS (login_id, password_hash) 
 	VALUES ('testUser1', 'hoge1'), ('testUser2', 'hoge')`)
 	if err != nil {
 		t.Fatalf("INSERT users FAIL : %v", err)
